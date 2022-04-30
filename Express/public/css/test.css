@@ -44,6 +44,10 @@ form > label{
     text-orientation: sideways-left;
 }
 
+input {
+    background-color: rgb(109, 183, 185);
+}
+
 
 @media only screen and (min-width: 200px) {
     .col-1{
@@ -59,7 +63,6 @@ form > label{
         padding: 15px
     }
 }
-
 
 @media only screen and (min-width: 800px) {
     .col-1{
