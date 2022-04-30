@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+
+<header>
+    <link rel="stylesheet" href="css/test.css" type="text/css">
+    <script></script>
+</header>
+
+
+<body>
+
+    <h3>SMS not send</h3>
+    <p>Sender: <span id="sender_display"></span></p>
+    <p>Reciever: <span id="reciever_display"></span></p>
+    <p>Message: <span id="message_display"></span></p>
+
+    <form action="/answer" method="get">
+        <label  for="sender">
+            Sender:
+        </label>
+        <input type="tel" id="sender" name="sender">
+        <br>
+        <label for="reciever">
+            Reciever:
+        </label>
+        <input type="tel" id="reciever" name="reciever">
+        <br>
+        <label for="sender">
+            Message:
+        </label>
+        <input type="tel" id="message" name="message">
+        <br>
+        <input type="submit" value="Send">
+    </form>
+</body>
+
+
+<footer>
+
+</footer>
+
+</html>

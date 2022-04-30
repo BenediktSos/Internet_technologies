@@ -124,3 +124,37 @@ function startGame(min, max) {
 
 
 startGame(0, 100)
+
+let x = new Game(-2000000,300000)
+
+
+
+
+class Game{
+    constructor(min,max){
+        this.goalNumber = betweenInClass(min, max + 1)
+        console.log(goalNumber)
+    }
+
+    runGame(){
+        while (!erraten) {
+            let guessNumber = prompt('Please enter a number between 0 and 100:')
+    
+            if (guessNumber == goalNumber) {
+                erraten = true
+                console.log(winMessage)
+            } else if (guessNumber < goalNumber) {
+                console.log(tooLowMessage)
+            } else if (guessNumber > goalNumber) {
+                console.log(tooHighMessage)
+            } else(
+                console.log(genericErrorMessage)
+            )
+        }
+    }
+
+
+    betweenInClass(min, max) {
+        return Math.floor(Math.random() * (max - min)) + min
+    }
+}

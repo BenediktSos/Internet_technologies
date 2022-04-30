@@ -1,0 +1,79 @@
+div{
+    box-sizing: border-box;
+    float: left;
+}
+
+body{
+    background-color:darkslategray;
+    color: rgb(129 255 251);
+}
+
+header{
+    font-size: x-small;
+}
+
+a{
+    color: rgb(137, 215, 111);
+}
+
+a:visited{
+    color: rgb(78, 143, 56);
+    text-decoration: wavy;
+}
+
+
+.fat{
+font-weight: bold;
+}
+
+#underscore{
+    text-decoration: underline;
+}
+
+#indent{
+    margin-left: 5%;
+}
+
+h1{
+    width: 20%;
+}
+
+form > label{
+    display: inline-block;
+    width: 75px;
+    text-orientation: sideways-left;
+}
+
+
+@media only screen and (min-width: 200px) {
+    .col-1{
+        width: 100%;
+        padding: 15px
+    }
+    .col-2{
+        width: 100%;
+        padding: 15px
+    }
+    .col-3{
+        width: 100%;
+        padding: 15px
+    }
+}
+
+
+@media only screen and (min-width: 800px) {
+    .col-1{
+        width: 20%;
+        background-color: aqua;
+        color: brown;
+    }
+    .col-2{
+        width: 30%;
+        background-color: aquamarine;
+        color: chocolate;
+    }
+    .col-3{
+        width: 50%;background-color: azure;
+        color: tomato;
+    }
+}

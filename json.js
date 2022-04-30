@@ -1,6 +1,22 @@
-const myStudent = '{"name":"John","alter":30,"fach":"informatik"}'
-const myJSONObject = JSON.parse(myStudent)
 
-x=myJSONObject.fach
+let myStudent = require("./sample4.json")
 
-console.log(x)
+let manualJSON = '{"hello":"world"}'
+const myJSONObject = JSON.parse(manualJSON)
+
+for (const human of myStudent.people) {
+    if (human.lastName === "Smith"){
+        console.log(human);
+    }
+}
+
+
+for (const human in myStudent) {
+    if (Object.hasOwnProperty.call(myStudent, human)) {
+        const element = myStudent[human];
+        if (element.lastName === "Smith"){
+            console.log(element);
+        }
+        
+    }
+}

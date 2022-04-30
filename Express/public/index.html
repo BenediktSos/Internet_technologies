@@ -1,34 +1,60 @@
 <!DOCTYPE html>
 <html>
-
+<header>Main Website</header>
 <head>
+    <script src="./js/helper.js"></script>
+    <link rel="stylesheet" href="css/test.css" type="text/css">
 </head>
 
-<body>
-    <h1>
+<body onload="greeting()">
+    <h1 id="underscore" class="fat" onmouseover="greeting()">
         Hi Mom!
     </h1>
     <p>
-        This is a website developed next to a <del>wndiow</del> window
+        This is a website developed next to a <del id="invisible">wndiow</del> window
     </p>
-    <p>
+    <p class="fat">
         Why HTML is cool:
     </p>
-    <ol>
-        <li><a href="http://localhost:8080/">Links</a></li>
-        <li>A second entry</li>
+    <ol id="indent" >
+        <li ><a href="./index2.html">Links</a></li>
+        <li >A second entry</li>
+        <li ><a href="http://100.81.19.34:8081/">**Websites!**</a></li>
     </ol>
-    <ul>
+    <ul id="indent">
         <li>Unordered lists</li>
         <li>And more entries</li>
     </ul>
-    <h2>New cutting edge next level tech demo:</h2>
-    <img src="media/MissileCommand_text.png" alt="Missile Command">
-    <small>soon on steam!</small>
-    <h2>On other News:</h2>
+    <h2 id="underscore">New cutting edge next level tech demo:</h2>
+    <img src="media/MissileCommand_text.png" alt="Missile Command" onmouseover="invisible()">
+    <sub>soon on steam™</sub>
+    <h2 id="underscore">On other News:</h2>
     <video width="300" height="200" controls>
         <source src="media/NyanBenedikt.mp4" type="video/mp4">
     </video>
+
+
+    <br><br>
+
+
+    <p>go to submission</p>
+
+
+    <br><br>
+
+
+    <div class="col-1">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+    </div>
+
+    <div class="col-2">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+    </div>
+
+    <div class="col-3">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+    </div>
+
 
 </body>
 <footer>

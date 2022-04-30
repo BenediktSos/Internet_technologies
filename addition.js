@@ -1,5 +1,5 @@
-var exports = module.exports = {}
+var expor = module.exports = {}
 
-exports.addition = function(a, b) {
+expor.addition = function(a, b) {
     return a + b
 }
