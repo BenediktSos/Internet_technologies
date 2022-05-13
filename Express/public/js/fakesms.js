@@ -1,23 +1,3 @@
-function greeting (){
-    alert("Hi Dad!")
-}
-
-function answer(){
-    alert("no, it's not")    
-}
-
-function invisible(){
-    var element = document.getElementById("invisible")
-    element.style.visibility = "hidden"
-}
-
-
-
-
-
-
-
-function init(){
 const token = " 25653:17341f39f5a7697043271ee083b04897";
 
 var postObj = {
@@ -32,6 +12,7 @@ var postObj = {
 };
 
 var postdata = JSON.stringify(postObj);
+exports.postd = postdata
 
 const https = require('https');
 const options = {
@@ -56,47 +37,9 @@ const req = https.request(options, res => {
     else if (res.statusCode == 402) console.log("Error: code = 402 - There are not enough funds on your account!");
     else if (res.statusCode == 403) console.log("Error: code = 403 - Account isn't activated. Please wait or contact to support!");
 })
-}
-
-
-
-function sendSMS(){
-    init()
-    /*
-    const url = document.URL
-    const urlSearchParams = new URLSearchParams(url)
-
-    
-    const sender = urlSearchParams.get('sender');
-    const reciever = urlSearchParams.get('reciever');
-    const message = urlSearchParams.get('message');
-    */
-
-    /*
-    postObj[sender_id] = sender
-    postObj[phone] = reciever
-    postObj[text] = message
-    */
-
-
-
-    req.on('error', error => {
-        console.error(error)
-    })
-    req.write(postdata);
-    req.end();
-}
-
-
-function setValues(){
-    const url = document.URL
-    const urlSearchParams = new URLSearchParams(url)
-
-    
-    const sender = urlSearchParams.get('sender');
-    const reciever = urlSearchParams.get('reciever');
-    const message = urlSearchParams.get('message');
-
-
-
-}
+exports.reque = req
+req.on('error', error => {
+    console.error(error)
+})
+req.write(postdata);
+req.end();
