@@ -1,0 +1,24 @@
+{
+  "greeting": [
+    "Hallo","Guten Morgen","Hey","Grüzi","Moin"
+  ],
+  "language": [
+    "Welche Programmiersprache darfs denn sein?", "Welche Sprache solls denn werden?"
+  ],
+  "algorithm":[
+    "Einen bestimmten Algorithmus?"
+  ],
+  "documentation": [
+    "Doc nötig?","Brachen sie eine Dokumentation? Die kostet dann aber extra"
+
+],
+  "pleaseStandBy":[
+    "DingDingDingDiiing Ding Ding Diiing","*Fahrstuhl.mp3*","Please stand by"
+  ],
+  "presentCode":[
+    "Ihr Code:"
+  ],
+  "repeat":[
+    "Darfs noch ein bisschen mehr sein?", "War das alles?"
+  ]
+}

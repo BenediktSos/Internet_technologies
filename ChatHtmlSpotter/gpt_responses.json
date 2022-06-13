@@ -1,0 +1,6 @@
+{
+  "language": "What is the name of the requested programming language in a single word?\n\n",
+  "algorithm": "What is the name of the requested Algorithm in a single word?\n\n",
+  "documentation": "Categorize in 'yes' and 'no':\n\n",
+  "generator": "Generate an insert_algorithm algorithm in insert_language insert_documentation documentation:\n\n"
+}

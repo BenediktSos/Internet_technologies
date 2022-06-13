@@ -1,5 +1,4 @@
 /* Pakete die wir brauchen */
-
 var bot = require('./bot.js')
 var express = require('express')
 
@@ -44,7 +43,7 @@ var connections = {}
 wss.on('request', function (request) {
   var connection = request.accept('chat', request.origin)
 
-  connection.on('message', function (message) {
+  connection.on('message', async function (message) {
     var name = ''
 
     for (var key in connections) {
@@ -89,7 +88,10 @@ wss.on('request', function (request) {
 
     // Leite die Daten des Users an den Bot weiter, damit der antworten kann
     if (uname !== 'MegaBot' && utype === 'msg') {
-      var test = myBot.post(umsg)
+      await myBot.post(umsg).catch()
+    }
+    if(utype === 'join'){
+      await myBot.reset()
     }
   })
 })
