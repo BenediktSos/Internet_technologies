@@ -17,8 +17,11 @@ class bot {
      * Bitte beachten Sie, dass die Server IP hardcodiert ist. Sie müssen sie umsetzten
      */
     constructor() {
-        this.dict = require("./chatbot.json");
-        this.gptResponses = require("./gpt_responses.json")
+        this.user_questions = null;
+        this.request = null;
+        this.gptResponses = null;
+        this.openai = new OpenAI(process.env.OPENAI_API_KEY);
+        this.topics = require("./topics.json");
 
 
         /** Die Websocketverbindung
@@ -77,17 +80,6 @@ class bot {
 
             joinGesp();
         });
-
-        this.openai = new OpenAI(process.env.OPENAI_API_KEY);
-        this.request = {
-            greeting: "",
-            language: "",
-            algorithm: "",
-            documentation: "",
-            pleaseStandBy: "",
-            presentCode: "",
-            repeat: ""
-        };
     }
 
     /**
@@ -107,140 +99,174 @@ class bot {
      */
     async post(nachricht) {
         let name = 'MegaBot';
-        let inhalt = 'AnError occured';
+        let responseMsg = 'An Error occurred';
 
-/*
-        for (const j in this.dict) {
-            if (nachricht.includes(j)) {
-                inhalt = this.dict[j]
+        if (this.request === null) {
+            await this.evaluateToRequest(nachricht).catch(e => console.log(e));
+        }
+        if (this.request === null) {
+            //todo
+            responseMsg = "Ask for topic";
+        } else {
+            let prompt = this.user_questions[this.intent];
+
+            let gpTResponse;
+            if (this.intent !== "generator") {
+                gpTResponse = await this.shortGPTResponse(prompt, nachricht).catch(e => console.log("rejection :("));
+            } else {
+                gpTResponse = await this.longGPTResponse().catch(e => console.log(e));
             }
-        }
- */
 
-        try {
-            let gPTResponse = await this.requestGPT3Response(this.intent, nachricht)
-            this.request[this.intent] = gPTResponse;
-        } catch (e) {
 
-        }
-
-        for (let intent in this.request) {
-            if (this.request[intent] === "") {
-                this.intent = intent;
-                break;
+            if (!gpTResponse.toLowerCase().includes("none")) {
+                this.request[this.intent] = gpTResponse;
             }
+            for (let intent in this.request) {
+                if (this.request[intent] === "") {
+                    this.intent = intent;
+                    break;
+                }
+            }
+
+            responseMsg = this.selectMessage(this.intent)
+
+            console.log(this.intent)
+            responseMsg = this.makeJsonSafe(responseMsg)
         }
-
-
-        inhalt = this.selectMessage(this.intent)
-
-
-        if (this.request.documentation !== "") {
-            let prompt = await this.buildPrompt();
-
-
-            const gptResponse = await this.openai.complete({
-                engine: 'curie',
-                prompt: prompt,
-                maxTokens: 512,
-                temperature: 0.6,
-                topP: 0.4,
-                presencePenalty: 0,
-                frequencyPenalty: 0,
-                bestOf: 1,
-                n: 1,
-                stream: false,
-                stop: []
-            }).catch((e) => console.error(e));
-
-            inhalt = gptResponse
-        }
-
-        console.log(this.intent)
-
         /*
          * Verarbeitung
         */
-        var msg = '{"type": "msg", "name": "' + name + '", "msg":"' + inhalt + +"\n"+this.intent+ '"}'
+        const msg = '{"type": "msg", "name": "' + name + '", "msg":"' + responseMsg + '"}';
         console.log('Send: ' + msg)
         this.client.con.sendUTF(msg)
     }
 
-    async requestGPT3Response(type, nachricht) {
-        let prompt;
-        switch (type) {
-            case "language":
-                prompt = this.gptResponses.language;
-                break;
-            case"documentation":
-                prompt = this.gptResponses.documentation;
-                break;
-            case "algorithm":
-                prompt = this.gptResponses.language;
-                break;
-            default:
-                prompt = "error";
-                break;
-        }
-
-        if (prompt === "error") {
-            return "."
-        }
-
-        prompt += nachricht + "\n";
-
-        let answer = await this.openai.complete({
-            engine: 'curie',
-            prompt: prompt,
-            maxTokens: 5,
-            temperature: 0,
-            topP: 0.2,
+    async longGPTResponse() {
+        const gptPrompt = await this.buildPrompt().catch(e => console.log("rejection :("));
+        const gptResponse = await this.openai.complete({
+            engine: 'davinci',
+            prompt: gptPrompt,
+            maxTokens: 128,
+            temperature: 0.7,
+            topP: 1,
             presencePenalty: 0,
             frequencyPenalty: 0,
             bestOf: 1,
             n: 1,
             stream: false,
-            stop: ["."]
-        });
-    return answer.data.choices[0].text;
+            stop: ["\"", gptPrompt]
+        }).catch(e => console.log("rejection: no code this time" + e));
+        try {
+            console.log(gptResponse.data.choices[0].text);
+            return gptResponse.data.choices[0].text;
+        } catch (e) {
+            console.log(e);
+        }
+    }
+
+    async shortGPTResponse(prompt, message) {
+        prompt = prompt + "\nQuestion:" + message + "\nAnswer:";
+
+        const answer = await this.openai.complete({
+            engine: 'davinci',
+            prompt: prompt,
+            maxTokens: 10,
+            temperature: 1,
+            topP: 1,
+            presencePenalty: 0,
+            frequencyPenalty: 0,
+            bestOf: 1,
+            n: 1,
+            stream: false,
+            stop: [".", "\n"]
+        }).catch(e => console.log("rejection: no code this time" + e));
+
+        return answer.data.choices[0].text;
     }
 
     async buildPrompt() {
         let prompt = this.gptResponses.generator;
-        this.request.documentation = this.request.documentation.toLowerCase();
 
-        prompt.replace("insert_algorithm", this.request.algorithm);
-        prompt.replace("insert_language", this.request.language);
-        if (this.request.documentation.includes("yes")) {
-            prompt.replace("insert_documentation", "with");
-        } else {
-            prompt.replace("insert_documentation", "without");
+        let insertTurn = 0;
+        while (prompt.includes("insert_")) {
+            prompt = prompt.replace("insert_" + insertTurn, this.request[insertTurn]);
+            insertTurn++;
         }
 
         return prompt;
     }
 
     selectMessage() {
-        let array = this.dict[this.intent];
+        let array = this.user_questions[this.intent];
         return array[Math.floor(Math.random() * array.length)];
     }
 
-    async reset(){
-        this.request = {
-            greeting: "",
-            language: "",
-            algorithm: "",
-            documentation: "",
-            pleaseStandBy: "",
-            presentCode: "",
-            repeat: ""
-        };
+    async reset() {
+        this.request = null;
+        this.user_questions = null;
+        this.gptResponses = null;
         this.intent = "";
-        await this.post("Hello");
+        //await this.post("Hello").catch(e => console.log("rejection :("));
     }
 
+    makeJsonSafe(input) {
+        const regexNewLine = new RegExp("\\n", "g");
+        const regexBackslash = new RegExp("\\\\", "g");
+        const regexForwardSlash = new RegExp("/", "g");
+        const regexDoubleQuotes = new RegExp("\"", "g");
+
+        let tempString = input;
+        tempString = tempString.replace(regexNewLine, "EOL");
+        tempString = tempString.replace(regexBackslash, "\\\\");
+        tempString = tempString.replace(regexForwardSlash, "\\/");
+        tempString = tempString.replace(regexDoubleQuotes, "\\\"");
+
+        return tempString;
+    }
+
+    async evaluateToRequest(message) {
+        let prompt = "Categorise into these categories:"
+        for (const topic in this.topics) {
+            prompt += topic + ",";
+        }
+        prompt += "none";
+        let topic = await this.shortGPTResponse(prompt, message).catch(e => console.log(e));
+        let filename = this.resolveFilename(topic, message);
+
+        this.user_questions = require(filename).user_questions;
+        this.request = require(filename).needed_information;
+        this.gptResponses = require(filename).gpt_questions;
+    }
+
+    resolveFilename(topic, message) {
+        let path = null;
+        message = message.toLowerCase();
+        topic = topic.toLowerCase();
+        for (const topicKey in this.topics) {
+            if (topic.includes(topicKey)) {
+                path = "./public/json_modules/" + topicKey + ".json";
+                break;
+            }
+        }
+        if (path === null) {
+            for (const topicValue of this.topics) {
+                if (topic.includes(topicValue)) {
+                    path = "./public/json_modules/" + topicValue + ".json";
+                    break;
+                }
+            }
+        }
+        if (path === null) {
+            for (const topicValue of this.topics) {
+                if (message.includes(topicValue)) {
+                    path = "./public/json_modules/" + topicValue + ".json";
+                    break;
+                }
+            }
+        }
+        return path;
+    }
 }
 
-
-module.exports = bot
+module.exports = bot;
 

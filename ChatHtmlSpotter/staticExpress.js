@@ -29,7 +29,7 @@ server.listen(8181)
 /* Wir erstellen einen Bot, der kann sich aber noch nicht mit 
     dem Socket Server verbinden, da dieser noch nciht läuft
 */
-var myBot = new bot()
+const myBot = new bot();
 
 // Hier erstellen wir den Server
 var wss = new WSS({
@@ -90,7 +90,7 @@ wss.on('request', function (request) {
     if (uname !== 'MegaBot' && utype === 'msg') {
       await myBot.post(umsg).catch()
     }
-    if(utype === 'join'){
+    if(utype !== 'msg'){
       await myBot.reset()
     }
   })
