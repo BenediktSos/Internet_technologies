@@ -87,7 +87,7 @@ wss.on('request', function (request) {
     }
 
     // Leite die Daten des Users an den Bot weiter, damit der antworten kann
-    if (uname !== 'MegaBot' && utype === 'msg') {
+    if (uname !== 'Chadbot' && utype === 'msg') {
       await myBot.post(umsg).catch()
     }
     if(utype !== 'msg'){

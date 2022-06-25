@@ -74,11 +74,13 @@ class bot {
              */
             function joinGesp() {
                 if (connection.connected) {
-                    connection.sendUTF('{"type": "join", "name":"MegaBot"}');
+                    connection.sendUTF('{"type": "join", "name":"Chadbot"}');
                 }
             }
 
             joinGesp();
+
+            this.name = 'Chadbot';
         });
     }
 
@@ -98,7 +100,6 @@ class bot {
      * @param nachricht auf die der bot reagieren soll
      */
     async post(nachricht) {
-        let name = 'MegaBot';
         let responseMsg = 'An Error occurred';
 
         if (this.request === null) {
@@ -108,37 +109,58 @@ class bot {
             //todo
             responseMsg = "Ask for topic";
         } else {
-            let prompt = this.user_questions[this.intent];
+            //process user input
+            await this.processUserInput(nachricht);
 
-            let gpTResponse;
-            if (this.intent !== "generator") {
-                gpTResponse = await this.shortGPTResponse(prompt, nachricht).catch(e => console.log("rejection :("));
-            } else {
-                gpTResponse = await this.longGPTResponse().catch(e => console.log(e));
-            }
+            //select intent
+            this.selectNextIntent();
 
-
-            if (!gpTResponse.toLowerCase().includes("none")) {
-                this.request[this.intent] = gpTResponse;
-            }
-            for (let intent in this.request) {
-                if (this.request[intent] === "") {
-                    this.intent = intent;
-                    break;
-                }
-            }
-
+            //select message
             responseMsg = this.selectMessage(this.intent)
 
-            console.log(this.intent)
+            //send GPT Answer
+            if (this.intent === "generator") {
+                await this.longGPTResponse().catch(e => console.log(e));
+            }
+
+            //make sure to transmit a valid JSON in post
             responseMsg = this.makeJsonSafe(responseMsg)
         }
         /*
          * Verarbeitung
         */
-        const msg = '{"type": "msg", "name": "' + name + '", "msg":"' + responseMsg + '"}';
+        const msg = '{"type": "msg", "name": "' + this.name + '", "msg":"' + responseMsg + '"}';
         console.log('Send: ' + msg)
         this.client.con.sendUTF(msg)
+    }
+
+    selectNextIntent() {
+        let intent
+
+        for (intent in this.request) {
+            if (this.request[intent] === "") {
+                this.intent = intent;
+                break;
+            }
+        }
+        if(intent === undefined) {
+            this.reset().catch(e => console.log(e));
+        }
+    }
+
+    async processUserInput(nachricht) {
+        if (this.intent !== undefined) {
+            let prompt = this.user_questions[this.intent];
+
+            let gpTResponse = await this.shortGPTResponse(prompt, nachricht).catch(e => console.log("rejection :("));
+            if (!gpTResponse.toLowerCase().includes("none")) {
+                this.request[this.intent] = gpTResponse;
+                this.notUnderstood = false;
+            }else{
+                //todo implement repeat logic
+                this.notUnderstood = true;
+            }
+        }
     }
 
     async longGPTResponse() {
@@ -158,7 +180,10 @@ class bot {
         }).catch(e => console.log("rejection: no code this time" + e));
         try {
             console.log(gptResponse.data.choices[0].text);
-            return gptResponse.data.choices[0].text;
+            const responseMsg = this.makeJsonSafe(gptResponse.data.choices[0].text);
+            const msg = '{"type": "msg", "name": "' + "GPT-3" + '", "msg":"' + responseMsg + '"}';
+            console.log('Send(GPT-Response): ' + msg)
+            this.client.con.sendUTF(msg)
         } catch (e) {
             console.log(e);
         }
@@ -187,9 +212,9 @@ class bot {
     async buildPrompt() {
         let prompt = this.gptResponses.generator;
 
-        let insertTurn = 0;
-        while (prompt.includes("insert_")) {
-            prompt = prompt.replace("insert_" + insertTurn, this.request[insertTurn]);
+        let insertTurn = 1;
+        for (const requestKey in this.request) {
+            prompt = prompt.replace("insert_" + insertTurn, this.request[requestKey]);
             insertTurn++;
         }
 
@@ -206,7 +231,16 @@ class bot {
         this.user_questions = null;
         this.gptResponses = null;
         this.intent = "";
-        //await this.post("Hello").catch(e => console.log("rejection :("));
+
+        //Send initial message
+        let responseMsg = "Ich bin ein Chatbot um Anfragen an GPT3 zu stellen. Mögliche Themen sind ";
+        for (const topic in this.topics) {
+            responseMsg += topic + ",";
+        }
+        responseMsg += "Bitte wählen Sie ein Thema aus";
+        const msg = '{"type": "msg", "name": "' + this.name + '", "msg":"' + responseMsg + '"}';
+        console.log('Send: ' + msg)
+        this.client.con.sendUTF(msg)
     }
 
     makeJsonSafe(input) {
@@ -249,15 +283,7 @@ class bot {
             }
         }
         if (path === null) {
-            for (const topicValue of this.topics) {
-                if (topic.includes(topicValue)) {
-                    path = "./public/json_modules/" + topicValue + ".json";
-                    break;
-                }
-            }
-        }
-        if (path === null) {
-            for (const topicValue of this.topics) {
+            for (const topicValue in this.topics) {
                 if (message.includes(topicValue)) {
                     path = "./public/json_modules/" + topicValue + ".json";
                     break;
